@@ -31,8 +31,8 @@ export function Scene({
           antialias: preset.antialias, 
           alpha: true,
           powerPreference: "high-performance",
-          shadowMap: preset.shadowMap,
         }}
+        shadows={preset.shadowMap}
         dpr={preset.pixelRatio} // Adaptive pixel ratio
         performance={{ min: 0.5 }} // Adaptive performance
       >

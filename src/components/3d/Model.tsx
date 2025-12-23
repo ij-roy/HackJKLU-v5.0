@@ -1,6 +1,6 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface ModelProps {
@@ -21,25 +21,30 @@ export function Model({
   animationSpeed = 1
 }: ModelProps) {
   const { scene } = useGLTF(path);
-  const meshRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group>(null);
 
   // Clone the scene to avoid mutating the original
   const clonedScene = scene.clone();
 
-  useFrame((state, delta) => {
-    if (animate && meshRef.current) {
-      meshRef.current.rotation.y += delta * animationSpeed;
+  useEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.add(clonedScene);
+      groupRef.current.position.set(...position);
+      groupRef.current.rotation.set(...rotation);
+      const scaleValue = Array.isArray(scale) ? scale[0] : scale;
+      groupRef.current.scale.set(scaleValue, scaleValue, scaleValue);
+    }
+  }, [clonedScene, position, rotation, scale]);
+
+  useFrame((_state, delta) => {
+    if (animate && groupRef.current) {
+      groupRef.current.rotation.y += delta * animationSpeed;
     }
   });
 
   return (
-    <primitive
-      ref={meshRef}
-      object={clonedScene}
-      position={position}
-      rotation={rotation}
-      scale={scale}
-    />
+    // @ts-expect-error - group is a valid R3F component
+    <group ref={groupRef} />
   );
 }
 

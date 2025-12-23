@@ -1,7 +1,6 @@
-import { useThree } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import * as THREE from 'three';
 
 interface CameraControllerProps {
   target?: [number, number, number];
