@@ -51,12 +51,12 @@ export function Hero() {
                     initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
                     animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                     transition={{ duration: 1.8, delay: 0.4, ease: "easeOut" }}
-                    className="mb-12"
+                    className="mb-8 md:mb-12"
                 >
-                    <h1 className="text-5xl md:text-7xl lg:text-9xl font-[Cinzel] font-bold text-stone-100 tracking-wider leading-none drop-shadow-2xl">
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-[Cinzel] font-bold text-stone-100 tracking-wider leading-none drop-shadow-2xl px-2">
                         THE<br />PENDRAGON<br />CYCLE
                     </h1>
-                    <p className="text-xl md:text-2xl font-[Cinzel] text-gold-500 mt-4 tracking-[0.2em] uppercase">
+                    <p className="text-sm sm:text-lg md:text-2xl font-[Cinzel] text-gold-500 mt-4 tracking-[0.2em] uppercase">
                         Rise of The Merlin
                     </p>
                 </motion.div>
@@ -66,16 +66,16 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
-                    className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+                    className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center w-full px-6"
                 >
-                    <button className="group relative px-8 py-3 overflow-hidden bg-transparent border border-stone-500 hover:border-white transition-colors duration-300">
-                        <span className="relative z-10 flex items-center gap-3 text-sm tracking-[0.2em] uppercase">
+                    <button className="w-full sm:w-auto group relative px-8 py-3 overflow-hidden bg-transparent border border-stone-500 hover:border-white transition-colors duration-300">
+                        <span className="relative z-10 flex items-center justify-center gap-3 text-xs sm:text-sm tracking-[0.2em] uppercase">
                             Get Access <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </span>
                         <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                     </button>
 
-                    <button className="group flex items-center gap-3 text-sm tracking-[0.2em] uppercase hover:text-gold-400 transition-colors">
+                    <button className="w-full sm:w-auto group flex items-center justify-center gap-3 text-xs sm:text-sm tracking-[0.2em] uppercase hover:text-gold-400 transition-colors">
                         <span className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center group-hover:border-gold-400 transition-colors">
                             <Play className="w-4 h-4 fill-current ml-1" />
                         </span>

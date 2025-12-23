@@ -61,11 +61,11 @@ export function Layout({ children }: LayoutProps) {
 
             {/* Full Screen Menu Overlay (Placeholder) */}
             {isMenuOpen && (
-                <div className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center">
-                    <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 left-8 text-white">Close</button>
-                    <nav className="flex flex-col gap-4 text-center">
+                <div className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4">
+                    <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 left-8 text-white p-2">Close</button>
+                    <nav className="flex flex-col gap-6 md:gap-4 text-center w-full">
                         {['Home', 'The Story', 'The Map', 'The Episodes', 'The People'].map((item) => (
-                            <Link key={item} to="#" className="text-3xl font-[Cinzel] hover:text-gold-400 transition-colors">{item}</Link>
+                            <Link key={item} to="#" className="text-3xl md:text-3xl font-[Cinzel] hover:text-gold-400 transition-colors py-2 block">{item}</Link>
                         ))}
                     </nav>
                 </div>
