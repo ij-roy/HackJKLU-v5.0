@@ -1,73 +1,118 @@
-# React + TypeScript + Vite
+# HackJKLU v5.0
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance 3D website for HackJKLU hackathon with Greek mythology theme, featuring stunning visuals, animations, and immersive experiences.
 
-Currently, two official plugins are available:
+## 🎨 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Greek Mythology Theme**: Beautiful color palette inspired by ancient Greece
+- **3D Models & Animations**: React Three Fiber integration for immersive 3D experiences
+- **Multi-Page Routing**: React Router for seamless navigation
+- **Performance Optimized**: Adaptive quality system, lazy loading, and smart caching
+- **Responsive Design**: Works beautifully on all devices
+- **Audio Integration**: Spatial audio support with Howler.js
 
-## React Compiler
+## 🚀 Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Clone the repository
+git clone https://github.com/bansal1806/hackjklu_v5.0.git
+cd hackjklu_v5.0
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Install dependencies
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Visit `http://localhost:5173` to see the site.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/
+│   ├── 3d/              # 3D components (Scene, Model, Camera)
+│   ├── audio/           # Audio management
+│   ├── layout/          # Layout components
+│   ├── navigation/      # Navigation components
+│   ├── performance/     # Performance monitoring
+│   └── sections/       # Page sections
+├── config/              # Configuration (theme, quality presets)
+├── hooks/               # Custom React hooks
+├── pages/               # Page components
+└── utils/               # Utility functions
+```
+
+## 🎨 Theme Colors
+
+### Primary Colors
+- **Blood Red**: `#6f1c16` - Primary accent, CTAs
+- **Void Black**: `#000000` - Backgrounds
+- **Terracotta**: `#7e4031` - Secondary accent, borders
+- **Golden Amber**: `#ee8a3c` - Call-to-action, glow
+- **Ivory Cream**: `#ffecd1` - Text, highlights
+
+### Extended Palette
+- Bronze, Olive Green, Marble White, Deep Wine, Gold Shimmer, Stone Gray
+
+## 🛠️ Tech Stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **React Router** - Routing
+- **React Three Fiber** - 3D rendering
+- **GSAP** - Animations
+- **Howler.js** - Audio
+- **Tailwind CSS** - Styling
+- **Framer Motion** - UI animations
+
+## 📚 Documentation
+
+- [Tech Stack Guide](./TECH_STACK.md) - Complete technology overview
+- [Example Usage](./EXAMPLE_USAGE.md) - Code examples
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
+
+## 🎯 Performance
+
+- Adaptive quality system (High/Medium/Low)
+- LOD (Level of Detail) for 3D models
+- Lazy loading for components
+- Model caching with IndexedDB
+- Smart post-processing
+
+## 🚢 Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+Deploy the `dist` folder to your hosting service (Vercel, Netlify, etc.)
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## 📝 License
+
+This project is for HackJKLU v5.0 event.
+
+## 🔗 Links
+
+- **Live Site**: [hackjklu-v5-0.vercel.app](https://hackjklu-v5-0.vercel.app)
+- **Repository**: [github.com/bansal1806/hackjklu_v5.0](https://github.com/bansal1806/hackjklu_v5.0)
+
+---
+
+Built with ❤️ for HackJKLU v5.0
