@@ -39,10 +39,10 @@ const TeamNode = ({ data }: NodeProps<Node<{ label: string; role: string; img: s
                 </div>
 
                 <div className="text-center">
-                    <h3 className={`font-medieval text-stone-100 leading-tight tracking-wide ${data.isHead ? 'text-xl text-amber-500' : 'text-lg'}`}>
+                    <h3 className={`font-cinzel text-stone-100 leading-tight tracking-wide ${data.isHead ? 'text-xl text-amber-500 font-bold' : 'text-lg'}`}>
                         {data.label as string}
                     </h3>
-                    <p className={`font-baskerville italic text-stone-500 mt-1 ${data.isHead ? 'text-sm text-amber-500/80 font-bold' : 'text-xs'}`}>
+                    <p className={`font-serif italic text-stone-500 mt-1 ${data.isHead ? 'text-sm text-amber-500/80 font-bold' : 'text-xs'}`}>
                         {data.role as string}
                     </p>
                 </div>
@@ -68,9 +68,10 @@ const COMMITTEES = Array.from({ length: 17 }, (_, i) => ({
 const generateNodesAndEdges = () => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
+    // ... (rest logic same, just re-writing for clarity/completeness or can assume same logic)
+    // To safe complexity, I will paste the logic exactly as it was.
 
     // 1. Place Heads centered at top
-    // Width of heads area
     const headSpacing = 450;
     const headsTotalWidth = (HEADS.length - 1) * headSpacing;
     const headsStartX = -headsTotalWidth / 2;
@@ -94,17 +95,13 @@ const generateNodesAndEdges = () => {
     });
 
     // 2. Place Committees in a grid below
-    // We have 17 committees. Let's do 2 rows: 9 + 8
     const row1Count = 9;
     const row2Count = 8;
-
     const committeeSpacingX = 280;
     const committeeRow1Y = 450;
     const committeeRow2Y = 750;
-
     const row1Width = (row1Count - 1) * committeeSpacingX;
     const row1StartX = -row1Width / 2;
-
     const row2Width = (row2Count - 1) * committeeSpacingX;
     const row2StartX = -row2Width / 2;
 
@@ -113,11 +110,9 @@ const generateNodesAndEdges = () => {
         let x, y;
 
         if (i < row1Count) {
-            // Row 1
             x = row1StartX + i * committeeSpacingX;
             y = committeeRow1Y;
         } else {
-            // Row 2
             const j = i - row1Count;
             x = row2StartX + j * committeeSpacingX;
             y = committeeRow2Y;
@@ -134,17 +129,16 @@ const generateNodesAndEdges = () => {
             },
         });
 
-        // 3. Connect EVERY Head to EVERY Committee (Shared Leadership)
         HEADS.forEach((_, hIndex) => {
             const headId = `head-${hIndex}`;
             edges.push({
                 id: `edge-${headId}-${committeeId}`,
                 source: headId,
                 target: committeeId,
-                type: 'step', // Step edges (right angles)
+                type: 'step',
                 animated: false,
                 style: {
-                    stroke: '#78716c', // stone-500
+                    stroke: '#78716c',
                     strokeWidth: 1,
                     opacity: 0.15
                 },
@@ -165,10 +159,10 @@ export function Team() {
     return (
         <section id="team" className="h-[120vh] w-full bg-[#0c0a09] relative mythic-texture overflow-hidden">
             <div className="absolute top-12 left-0 right-0 z-10 text-center pointer-events-none">
-                <h2 className="text-5xl md:text-7xl font-medieval text-amber-500/90 tracking-wider drop-shadow-[0_4px_10px_rgba(245,158,11,0.3)]">
+                <h2 className="text-5xl md:text-7xl font-cinzel text-amber-500/90 tracking-wider drop-shadow-[0_4px_10px_rgba(245,158,11,0.3)] font-bold">
                     The Order
                 </h2>
-                <p className="text-stone-500 font-baskerville italic mt-4 text-xl tracking-wide">
+                <p className="text-stone-500 font-serif italic mt-4 text-xl tracking-wide">
                     Guardians of the HackJKLU Legacy
                 </p>
             </div>
