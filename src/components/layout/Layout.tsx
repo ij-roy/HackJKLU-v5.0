@@ -43,14 +43,7 @@ export function Layout({ children }: LayoutProps) {
                     </button>
                 </div>
 
-                {/* Logo - Center */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto px-6" style={{ backgroundColor: 'var(--void-black)' }}>
-                    <Link to="/" className="block transition-colors">
-                        <span className="font-[Cinzel] tracking-[0.2em] font-bold text-sm sm:text-base text-ivory-cream hover:text-gold-shimmer transition-colors">
-                            HACKJKLU 5.0
-                        </span>
-                    </Link>
-                </div>
+                {/* Logo - Center (Removed) */}
 
                 {/* Sound Button - Right */}
                 <div className="absolute top-0 right-8 -translate-y-1/2 pointer-events-auto px-2" style={{ backgroundColor: 'var(--void-black)' }}>
@@ -89,9 +82,9 @@ export function Layout({ children }: LayoutProps) {
                             style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
                             onClick={() => setIsMenuOpen(false)}
                         />
-                        
+
                         {/* Sidebar Menu */}
-                    <motion.div
+                        <motion.div
                             initial={{ x: -400 }}
                             animate={{ x: 0 }}
                             exit={{ x: -400 }}
@@ -105,7 +98,7 @@ export function Layout({ children }: LayoutProps) {
                                 <button
                                     onClick={() => setIsMenuOpen(false)}
                                     className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                    style={{ 
+                                    style={{
                                         backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                         color: 'var(--ivory-cream)'
                                     }}
@@ -133,7 +126,7 @@ export function Layout({ children }: LayoutProps) {
                                                 to={item.path}
                                                 onClick={() => setIsMenuOpen(false)}
                                                 className="flex items-center gap-4 group transition-all"
-                                                style={{ 
+                                                style={{
                                                     color: isActive ? 'var(--gold-shimmer)' : 'var(--ivory-cream)',
                                                     fontStyle: 'italic'
                                                 }}
@@ -150,20 +143,20 @@ export function Layout({ children }: LayoutProps) {
                                                     }
                                                 }}
                                             >
-                                                <span className="font-[Cinzel] text-xl tracking-wider" style={{ 
+                                                <span className="font-[Cinzel] text-xl tracking-wider" style={{
                                                     color: isActive ? 'var(--gold-shimmer)' : 'var(--stone-gray)',
                                                     minWidth: '2.5rem'
                                                 }}>
                                                     {item.number}.
                                                 </span>
                                                 <span className="font-[Cinzel] text-xl tracking-wide">
-                                    {item.name}
+                                                    {item.name}
                                                 </span>
                                             </Link>
                                         );
                                     })}
                                 </div>
-                        </nav>
+                            </nav>
 
                             {/* Subscribe Section */}
                             <div className="px-8 py-4 border-t" style={{ borderColor: 'rgba(126, 64, 49, 0.3)' }}>
@@ -198,7 +191,7 @@ export function Layout({ children }: LayoutProps) {
                                     Terms of Use & Privacy Policy
                                 </Link>
                             </div>
-                    </motion.div>
+                        </motion.div>
                     </>
                 )}
             </AnimatePresence>
