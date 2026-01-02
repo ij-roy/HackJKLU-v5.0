@@ -160,7 +160,7 @@ export default function Prizes() {
         if (currentSection === 0 && !isPaused && !isAnimating) {
             const interval = setInterval(() => {
                 handleNext();
-            }, 5000); // Change slide every 5 seconds
+            }, 10000); // Change slide every 10 seconds
 
             return () => clearInterval(interval);
         }
@@ -174,7 +174,7 @@ export default function Prizes() {
     }, []);
 
     return (
-        <div ref={containerRef} className="relative bg-neutral-950 text-neutral-100 min-h-screen overflow-hidden selection:bg-yellow-900 selection:text-white pt-16 sm:pt-20 md:pt-24 pb-16 sm:pb-20 md:pb-24">
+        <div ref={containerRef} className="relative bg-neutral-950 text-neutral-100 min-h-screen overflow-hidden selection:bg-yellow-900 selection:text-white pt-32 sm:pt-36 md:pt-40 lg:pt-44 xl:pt-48 pb-20 sm:pb-24 md:pb-28">
             {/* Section Navigation Indicators */}
             <div className="fixed right-2 sm:right-4 md:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 sm:gap-3 md:gap-4">
                 {sections.map((section) => (
@@ -192,15 +192,36 @@ export default function Prizes() {
             </div>
 
             {/* Scroll Hint with enhanced styling */}
-            <div className="fixed bottom-20 sm:bottom-24 md:bottom-28 left-1/2 -translate-x-1/2 z-50 text-center">
+            <div className="fixed bottom-12 sm:bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 z-50 text-center">
+                {/* Slide Indicators - Moved up (only show for main prizes section) */}
+                {currentSection === 0 && (
+                    <div className="flex justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                        {mainPrizes.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => goToSlide(index)}
+                                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                                    index === activeIndex
+                                        ? 'bg-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.6)]'
+                                        : 'bg-neutral-600 hover:bg-neutral-500'
+                                }`}
+                                aria-label={`Go to ${mainPrizes[index].god} prize`}
+                            />
+                        ))}
+                    </div>
+                )}
+                
+                {/* Keyboard Instructions */}
                 <motion.p 
                     initial={{ opacity: 0.6 }}
                     animate={{ opacity: [0.6, 1, 0.6] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="text-xs sm:text-sm text-neutral-400 mb-1 sm:mb-2 font-cinzel tracking-wider"
+                    className="text-xs sm:text-sm text-neutral-400 mb-2 sm:mb-3 font-cinzel tracking-wider"
                 >
                     {currentSection === 0 ? 'Use ← → keys or scroll to explore' : 'Scroll to explore'}
                 </motion.p>
+                
+                {/* Mouse Indicator */}
                 <motion.div 
                     className="w-5 h-8 sm:w-6 sm:h-10 md:w-8 md:h-12 border-2 border-neutral-500 rounded-full mx-auto relative"
                     whileHover={{ scale: 1.1, borderColor: '#d4af37' }}
@@ -532,7 +553,7 @@ export default function Prizes() {
                         initial={{ opacity: 0, y: -30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl mb-4 sm:mb-6 md:mb-8 lg:mb-12 xl:mb-16 2xl:mb-20 text-center tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.25em] xl:tracking-[0.3em] text-[#e8dab2] drop-shadow-[0_0_20px_rgba(232,218,178,0.4)]"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl mb-6 sm:mb-8 md:mb-10 lg:mb-12 xl:mb-16 2xl:mb-20 text-center tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.25em] xl:tracking-[0.3em] text-[#e8dab2] drop-shadow-[0_0_20px_rgba(232,218,178,0.4)] mt-8 sm:mt-10 md:mt-12 lg:mt-8"
                     >
                         PRIZES
                     </motion.h1>
@@ -557,12 +578,12 @@ export default function Prizes() {
 
                         {/* Cards Container */}
                         <div className="relative w-full h-full flex items-center justify-center px-2 sm:px-4 md:px-8 lg:px-12">
-                            {/* Left Card (Previous) - Moved closer to center */}
+                            {/* Left Card (Previous) - Symmetrical positioning */}
                             <motion.div
                                 key={`prev-${prevIndex}`}
                                 initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.25, x: -40, scale: 0.6 }}
-                                className="absolute left-[8%] sm:left-[10%] md:left-[12%] lg:left-[15%] xl:left-[18%] blur-[1px] z-10 cursor-pointer hidden md:block"
+                                animate={{ opacity: 0.25, x: 0, scale: 0.6 }}
+                                className="absolute left-[2%] sm:left-[4%] md:left-[6%] lg:left-[8%] xl:left-[10%] blur-[1px] z-10 cursor-pointer hidden md:block"
                                 onClick={handlePrev}
                             >
                                 <div
@@ -596,12 +617,12 @@ export default function Prizes() {
                                 </motion.div>
                             </AnimatePresence>
 
-                            {/* Right Card (Next) - Moved further from center to avoid text overlap */}
+                            {/* Right Card (Next) - Symmetrical positioning */}
                             <motion.div
                                 key={`next-${nextIndex}`}
                                 initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.25, x: 120, scale: 0.6 }}
-                                className="absolute right-[25%] sm:right-[28%] md:right-[30%] lg:right-[32%] xl:right-[35%] blur-[1px] z-10 cursor-pointer hidden md:block"
+                                animate={{ opacity: 0.25, x: 0, scale: 0.6 }}
+                                className="absolute right-[1%] sm:right-[1%] md:right-[1%] lg:right-[1%] xl:right-[1%] blur-[1px] z-10 cursor-pointer hidden md:block"
                                 onClick={handleNext}
                             >
                                 <div
@@ -626,7 +647,7 @@ export default function Prizes() {
                                     <h3 className="text-4xl xl:text-5xl 2xl:text-6xl font-medieval text-white mb-2 xl:mb-3 leading-tight">
                                         {activePrize.god}
                                     </h3>
-                                    <p className="text-base xl:text-lg 2xl:text-xl italic text-neutral-400 font-baskerville mb-4 xl:mb-6 border-b border-neutral-700 pb-3 xl:pb-4 w-full">
+                                    <p className="text-base xl:text-lg 2xl:text-xl italic text-neutral-400 font-baskerville mb-4 xl:mb-6 pb-3 xl:pb-4 w-full">
                                         {activePrize.role}
                                     </p>
                                     <div className="text-5xl xl:text-6xl 2xl:text-7xl font-bold font-baskerville tracking-tighter" style={{
@@ -667,46 +688,6 @@ export default function Prizes() {
                             </div>
                         </motion.div>
                     </AnimatePresence>
-
-                    {/* Slide Indicators */}
-                    <div className="flex justify-center mt-6 sm:mt-8 gap-2 sm:gap-3">
-                        {mainPrizes.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => goToSlide(index)}
-                                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                                    index === activeIndex
-                                        ? 'bg-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.6)]'
-                                        : 'bg-neutral-600 hover:bg-neutral-500'
-                                }`}
-                                aria-label={`Go to ${mainPrizes[index].god} prize`}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Auto-play Control */}
-                    <div className="flex justify-center mt-4 sm:mt-6">
-                        <button
-                            onClick={() => setIsPaused(!isPaused)}
-                            className="text-xs sm:text-sm text-neutral-400 hover:text-[#d4af37] transition-colors duration-300 flex items-center gap-2"
-                            aria-label={isPaused ? 'Resume auto-play' : 'Pause auto-play'}
-                        >
-                            {isPaused ? (
-                                <>
-                                    <div className="w-0 h-0 border-l-[6px] border-l-current border-y-[4px] border-y-transparent" />
-                                    Resume
-                                </>
-                            ) : (
-                                <>
-                                    <div className="flex gap-1">
-                                        <div className="w-1 h-3 bg-current" />
-                                        <div className="w-1 h-3 bg-current" />
-                                    </div>
-                                    Pause
-                                </>
-                            )}
-                        </button>
-                    </div>
                 </div>
                 </motion.section>
             </AnimatePresence>
