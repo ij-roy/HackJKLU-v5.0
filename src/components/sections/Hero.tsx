@@ -43,7 +43,7 @@ export function Hero() {
                     transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
                 >
                     <h2 className="text-sm md:text-base tracking-[0.3em] uppercase mb-4 font-sans" style={{ color: 'var(--stone-gray)' }}>
-                        March 7 - 9, 2025 • JK Lakshmipat University
+                        March 13<sup className="text-[0.6em] lowercase">th</sup> - 15<sup className="text-[0.6em] lowercase">th</sup>, 2026 • JK Lakshmipat University
                     </h2>
                 </motion.div>
 
@@ -57,7 +57,7 @@ export function Hero() {
                         HACKJKLU<br />5.0
                     </h1>
                     <p className="text-sm sm:text-lg md:text-xl font-[Cinzel] mt-4 tracking-[0.2em] uppercase text-glow-amber" style={{ color: 'var(--gold-shimmer)' }}>
-                        Ideate. Innovate. Inspire.
+                        Where innovation meets code
                     </p>
                 </motion.div>
 
@@ -73,7 +73,7 @@ export function Hero() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full sm:w-auto group relative px-8 py-3 overflow-hidden bg-transparent text-center transition-all duration-300"
-                        style={{ 
+                        style={{
                             border: '1px solid var(--terracotta)',
                             color: 'var(--ivory-cream)'
                         }}
@@ -93,13 +93,15 @@ export function Hero() {
                     </a>
 
                     <a
-                        href="#"
+                        href="https://discord.gg/TYyAmwzC38"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="w-full sm:w-auto group flex items-center justify-center gap-3 text-xs sm:text-sm tracking-[0.2em] uppercase transition-colors"
                         style={{ color: 'var(--ivory-cream)' }}
                         onMouseEnter={(e) => e.currentTarget.style.color = 'var(--gold-shimmer)'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ivory-cream)'}
                     >
-                        <span 
+                        <span
                             className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
                             style={{ border: '1px solid rgba(255, 236, 209, 0.3)' }}
                             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--gold-shimmer)'}
