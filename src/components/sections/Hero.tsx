@@ -1,143 +1,507 @@
 
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, ChevronRight, Play } from 'lucide-react';
-
+import { useEffect, useRef, useState } from 'react';
 
 export function Hero() {
-    const [hasInteracted, setHasInteracted] = useState(false);
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [timeLeft, setTimeLeft] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+    });
 
-    // Attempt to play video on interaction
-    const handleInteraction = () => {
-        setHasInteracted(true);
-        if (videoRef.current) {
-            videoRef.current.muted = false;
-            videoRef.current.play().catch(e => console.log("Autoplay prevented", e));
+    // Timer countdown logic
+    useEffect(() => {
+        // Set target date (you can modify this to your desired countdown target)
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 30); // 30 days from now
+        
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+            
+            if (distance > 0) {
+                setTimeLeft({
+                    days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                    minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                    seconds: Math.floor((distance % (1000 * 60)) / 1000)
+                });
+            } else {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            }
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        if (!canvasRef.current) return;
+
+        // Three.js setup
+        const canvas = canvasRef.current;
+        const scene = new (window as any).THREE.Scene();
+        const camera = new (window as any).THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new (window as any).THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.outputColorSpace = (window as any).THREE.SRGBColorSpace;
+        renderer.toneMapping = (window as any).THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+
+        camera.position.z = 1;
+
+        // Load skybox
+        const textureLoader = new (window as any).THREE.TextureLoader();
+        textureLoader.load('/skybox.jpg', (texture: any) => {
+            texture.colorSpace = (window as any).THREE.SRGBColorSpace;
+            scene.background = texture;
+            scene.environment = texture;
+        });
+
+        // Simple falling gold particle system
+        const particleCount = 400;
+        const particleGeometry = new (window as any).THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            // Spread particles across the scene
+            positions[i] = (Math.random() - 0.5) * 6;     // X position
+            positions[i + 1] = (Math.random() - 0.5) * 6; // Y position  
+            positions[i + 2] = (Math.random() - 0.5) * 3; // Z position
+            
+            // Gentle falling velocities
+            velocities[i] = (Math.random() - 0.5) * 0.01;      // Slight horizontal drift
+            velocities[i + 1] = -0.008 - Math.random() * 0.005; // Gentle downward
+            velocities[i + 2] = (Math.random() - 0.5) * 0.005;  // Slight depth movement
         }
-    };
+
+        particleGeometry.setAttribute('position', new (window as any).THREE.BufferAttribute(positions, 3));
+        particleGeometry.setAttribute('velocity', new (window as any).THREE.BufferAttribute(velocities, 3));
+
+        // Create circular texture for particles
+        function createCircleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const context = canvas.getContext('2d')!;
+            
+            // Create radial gradient for smooth circular particles
+            const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gradient.addColorStop(0, 'rgba(255, 215, 0, 1)');    // Gold center
+            gradient.addColorStop(0.3, 'rgba(255, 215, 0, 0.8)'); // Fade
+            gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');     // Transparent edge
+            
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 64, 64);
+            
+            return new (window as any).THREE.CanvasTexture(canvas);
+        }
+
+        const particleTexture = createCircleTexture();
+        
+        const particleMaterial = new (window as any).THREE.PointsMaterial({
+            color: 0xFFD700, // Gold color
+            size: 4,
+            map: particleTexture,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: false,
+            alphaTest: 0.1,
+            blending: (window as any).THREE.AdditiveBlending
+        });
+
+        const particles = new (window as any).THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        // Lighting
+        const ambientLight = new (window as any).THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new (window as any).THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // Animation variables
+        let animationId: number;
+
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+
+            // Simple falling particle animation
+            const positionAttribute = particleGeometry.getAttribute('position');
+            const velocityAttribute = particleGeometry.getAttribute('velocity');
+            const positions = positionAttribute.array;
+            const velocities = velocityAttribute.array;
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                // Update positions
+                positions[i] += velocities[i];         // X
+                positions[i + 1] += velocities[i + 1]; // Y
+                positions[i + 2] += velocities[i + 2]; // Z
+
+                // Reset particles that fall below the view
+                if (positions[i + 1] < -3) {
+                    positions[i + 1] = 3;
+                    positions[i] = (Math.random() - 0.5) * 6;
+                    positions[i + 2] = (Math.random() - 0.5) * 3;
+                }
+
+                // Keep particles within bounds
+                if (positions[i] > 3) positions[i] = -3;
+                if (positions[i] < -3) positions[i] = 3;
+                if (positions[i + 2] > 1.5) positions[i + 2] = -1.5;
+                if (positions[i + 2] < -1.5) positions[i + 2] = 1.5;
+            }
+
+            positionAttribute.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle resize
+        const handleResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            window.removeEventListener('resize', handleResize);
+            renderer.dispose();
+        };
+    }, []);
 
     return (
         <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+            
+            {/* Three.js Canvas */}
+            <canvas 
+                ref={canvasRef}
+                className="absolute inset-0 z-0"
+                style={{ display: 'block', width: '100%', height: '100%' }}
+            />
 
-            {/* Background Video (Placeholder) */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-black/40 z-10" /> {/* Overlay */}
-                <video
-                    ref={videoRef}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover opacity-60"
-                    // Using a placeholder video that looks somewhat cinematic (nature/snow)
-                    src="https://assets.mixkit.co/videos/preview/mixkit-winter-forest-with-heavy-snow-and-fog-25660-large.mp4"
-                />
-            </div>
-
-            {/* Content */}
-            <div className="relative z-20 text-center px-4 max-w-4xl mx-auto mt-20">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
+            {/* Lightning Bolt Overlay with Rotating Rings */}
+            <div className="absolute inset-0 z-10">
+                {/* Title and Subtitle */}
+                <div
+                    className="absolute"
+                    style={{
+                        top: '100px',
+                        left: '959px',
+                        transform: 'translateX(-50%)',
+                        textAlign: 'center',
+                        zIndex: 15,
+                    }}
                 >
-                    <h2 className="text-sm md:text-base tracking-[0.3em] uppercase mb-4 font-sans" style={{ color: 'var(--stone-gray)' }}>
-                        March 13<sup className="text-[0.6em] lowercase">th</sup> - 15<sup className="text-[0.6em] lowercase">th</sup>, 2026 • JK Lakshmipat University
-                    </h2>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    transition={{ duration: 1.8, delay: 0.4, ease: "easeOut" }}
-                    className="mb-8 md:mb-12"
-                >
-                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-[Cinzel] font-bold tracking-wider leading-none px-2" style={{ color: 'var(--ivory-cream)', textShadow: '0 0 30px rgba(74, 14, 14, 0.8), 0 10px 40px rgba(74, 14, 14, 0.6)' }}>
-                        HACKJKLU<br />5.0
-                    </h1>
-                    <p className="text-sm sm:text-lg md:text-xl font-[Cinzel] mt-4 tracking-[0.2em] uppercase text-glow-amber" style={{ color: 'var(--gold-shimmer)' }}>
-                        Where innovation meets code
-                    </p>
-                </motion.div>
-
-                {/* Buttons */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
-                    className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center w-full px-6"
-                >
-                    <a
-                        href="https://hackjklu-4.devfolio.co/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto group relative px-8 py-3 overflow-hidden bg-transparent text-center transition-all duration-300"
+                    {/* Main Title */}
+                    <h1
+                        className="font-cinzel"
                         style={{
-                            border: '1px solid var(--terracotta)',
-                            color: 'var(--ivory-cream)'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = 'var(--gold-shimmer)';
-                            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'var(--terracotta)';
-                            e.currentTarget.style.boxShadow = 'none';
+                            fontSize: '64px',
+                            fontWeight: 'bold',
+                            color: '#d4af37',
+                            textShadow: '0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4)',
+                            letterSpacing: '4px',
+                            marginBottom: '4px',
                         }}
                     >
-                        <span className="relative z-10 flex items-center justify-center gap-3 text-xs sm:text-sm tracking-[0.2em] uppercase">
-                            Register Now <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                        <div className="absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" style={{ backgroundColor: 'rgba(238, 138, 60, 0.1)' }} />
-                    </a>
+                        HACKJKLU 5.0
+                    </h1>
+                    
+                    {/* Subtitle */}
+                    <p
+                        className="font-cinzel"
+                        style={{
+                            fontSize: '18px',
+                            fontStyle: 'italic',
+                            color: 'rgba(212, 175, 55, 0.9)',
+                            textShadow: '0 0 10px rgba(212, 175, 55, 0.5)',
+                            letterSpacing: '2px',
+                        }}
+                    >
+                        13 March - 15 March 2026
+                    </p>
+                </div>
 
-                    <a
-                        href="https://discord.gg/TYyAmwzC38"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto group flex items-center justify-center gap-3 text-xs sm:text-sm tracking-[0.2em] uppercase transition-colors"
-                        style={{ color: 'var(--ivory-cream)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--gold-shimmer)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ivory-cream)'}
+                {/* Rings hover container - sized to match outer ring */}
+                <div 
+                    className="absolute rings-container"
+                    style={{
+                        top: '562px',
+                        left: '1001px',
+                        transform: 'translate(-50%, -50%)',
+                        width: '1200px',
+                        height: '800px',
+                        pointerEvents: 'auto',
+                    }}
+                >
+                    {/* Outer Runic Ring - Outermost, rotates anticlockwise */}
+                    <div 
+                        className="absolute"
+                        style={{
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
                     >
-                        <span
-                            className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                            style={{ border: '1px solid rgba(255, 236, 209, 0.3)' }}
-                            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--gold-shimmer)'}
-                            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 236, 209, 0.3)'}
-                        >
-                            <Play className="w-4 h-4 fill-current ml-1" />
-                        </span>
-                        Join Discord
-                    </a>
-                </motion.div>
-            </div>
+                        <img
+                            src="/outer_runic_ring.png"
+                            alt="Outer Runic Ring"
+                            className="ring-glow-outer"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                opacity: 0.8,
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Middle Ring - Middle, rotates clockwise */}
+                    <div 
+                        className="absolute"
+                        style={{
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '81.67%',
+                            height: '81.63%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <img
+                            src="/middle_ring.png"
+                            alt="Middle Ring"
+                            className="ring-glow-middle"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                opacity: 0.85,
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Inner Ring - Innermost, rotates anticlockwise */}
+                    <div 
+                        className="absolute"
+                        style={{
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '40.83%',
+                            height: '40.88%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <img
+                            src="/inner_ring.png"
+                            alt="Inner Ring"
+                            className="ring-glow-inner"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                opacity: 0.9,
+                            }}
+                        />
+                    </div>
+                </div>
+                
+                {/* Lightning Bolt - On top of all rings */}
+                <img
+                    src="/lightning-bolt.png"
+                    alt="Lightning Bolt"
+                    className="absolute"
+                    style={{
+                        bottom: '0%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '70%',
+                        height: '85%',
+                        objectFit: 'contain',
+                        objectPosition: 'bottom center',
+                        opacity: 1,
+                        zIndex: 10,
+                    }}
+                />
 
-            {/* Splash Screen / Sound Toggle Overlay */}
-            <AnimatePresence>
-                {!hasInteracted && (
-                    <motion.div
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-50 bg-black flex items-center justify-center cursor-pointer"
-                        onClick={handleInteraction}
+                {/* Ancient Greek Timer */}
+                <div
+                    className="absolute font-medieval"
+                    style={{
+                        top: '900px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 15,
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                            padding: '16px 32px',
+                            background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(184, 134, 11, 0.15))',
+                            border: '2px solid rgba(212, 175, 55, 0.4)',
+                            borderRadius: '4px',
+                            boxShadow: 'inset 0 2px 0 rgba(212, 175, 55, 0.3), 0 0 25px rgba(212, 175, 55, 0.2)',
+                        }}
                     >
-                        <motion.button
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            className="flex flex-col items-center gap-4 transition-colors"
-                            style={{ color: 'var(--stone-gray)' }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--gold-shimmer)'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--stone-gray)'}
-                        >
-                            <div className="w-16 h-16 rounded-full border border-current flex items-center justify-center glow-amber">
-                                <Volume2 className="w-6 h-6" />
+                        {/* Days */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div
+                                className="font-uncial"
+                                style={{
+                                    fontSize: '28px',
+                                    fontWeight: 'bold',
+                                    color: '#d4af37',
+                                    textShadow: '0 0 12px rgba(212, 175, 55, 0.8)',
+                                }}
+                            >
+                                {String(timeLeft.days).padStart(2, '0')}
                             </div>
-                            <span className="text-xs uppercase tracking-[0.3em]">Enter HACKJKLU 5.0</span>
-                        </motion.button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            <div
+                                className="font-cinzel"
+                                style={{
+                                    fontSize: '11px',
+                                    color: 'rgba(212, 175, 55, 0.8)',
+                                    letterSpacing: '2px',
+                                    textTransform: 'uppercase',
+                                    marginTop: '4px',
+                                }}
+                            >
+                                ΗΜΕΡΕΣ
+                            </div>
+                        </div>
+
+                        <div className="font-uncial" style={{ color: '#d4af37', fontSize: '24px', fontWeight: 'bold' }}>:</div>
+
+                        {/* Hours */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div
+                                className="font-uncial"
+                                style={{
+                                    fontSize: '28px',
+                                    fontWeight: 'bold',
+                                    color: '#d4af37',
+                                    textShadow: '0 0 12px rgba(212, 175, 55, 0.8)',
+                                }}
+                            >
+                                {String(timeLeft.hours).padStart(2, '0')}
+                            </div>
+                            <div
+                                className="font-cinzel"
+                                style={{
+                                    fontSize: '11px',
+                                    color: 'rgba(212, 175, 55, 0.8)',
+                                    letterSpacing: '2px',
+                                    textTransform: 'uppercase',
+                                    marginTop: '4px',
+                                }}
+                            >
+                                ΩΡΕΣ
+                            </div>
+                        </div>
+
+                        <div className="font-uncial" style={{ color: '#d4af37', fontSize: '24px', fontWeight: 'bold' }}>:</div>
+
+                        {/* Minutes */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div
+                                className="font-uncial"
+                                style={{
+                                    fontSize: '28px',
+                                    fontWeight: 'bold',
+                                    color: '#d4af37',
+                                    textShadow: '0 0 12px rgba(212, 175, 55, 0.8)',
+                                }}
+                            >
+                                {String(timeLeft.minutes).padStart(2, '0')}
+                            </div>
+                            <div
+                                className="font-cinzel"
+                                style={{
+                                    fontSize: '11px',
+                                    color: 'rgba(212, 175, 55, 0.8)',
+                                    letterSpacing: '2px',
+                                    textTransform: 'uppercase',
+                                    marginTop: '4px',
+                                }}
+                            >
+                                ΛΕΠΤΑ
+                            </div>
+                        </div>
+
+                        <div className="font-uncial" style={{ color: '#d4af37', fontSize: '24px', fontWeight: 'bold' }}>:</div>
+
+                        {/* Seconds */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div
+                                className="font-uncial"
+                                style={{
+                                    fontSize: '28px',
+                                    fontWeight: 'bold',
+                                    color: '#d4af37',
+                                    textShadow: '0 0 12px rgba(212, 175, 55, 0.8)',
+                                }}
+                            >
+                                {String(timeLeft.seconds).padStart(2, '0')}
+                            </div>
+                            <div
+                                className="font-cinzel"
+                                style={{
+                                    fontSize: '11px',
+                                    color: 'rgba(212, 175, 55, 0.8)',
+                                    letterSpacing: '2px',
+                                    textTransform: 'uppercase',
+                                    marginTop: '4px',
+                                }}
+                            >
+                                ΔΕΥΤ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quote text - inscription style */}
+                <p
+                    className="absolute font-cinzel"
+                    style={{
+                        top: '1014px',
+                        left: '952px',
+                        transform: 'translateX(-50%)',
+                        fontSize: '13px',
+                        fontStyle: 'italic',
+                        color: '#d4af37',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                        textShadow: '0 0 10px rgba(212, 175, 55, 0.5), 0 0 20px rgba(212, 175, 55, 0.3)',
+                        zIndex: 15,
+                    }}
+                >
+                    — Where Innovation Meets Code —
+                </p>
+            </div>
 
         </section>
     );
