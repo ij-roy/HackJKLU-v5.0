@@ -26,7 +26,7 @@ function App() {
         <Route path="/partners" element={<Partners />} />
         <Route path="/itinerary" element={<><ComingSoonOverlay><Itinerary /></ComingSoonOverlay><PageNavigation /></>} />
         <Route path="/speakers" element={<SpeakersPage />} />
-        <Route path="/gallery" element={<><ComingSoonOverlay><Gallery /></ComingSoonOverlay><PageNavigation /></>} />
+        <Route path="/gallery" element={<><Gallery /><PageNavigation /></>} />
         <Route path="/faq" element={<><ComingSoonOverlay><FAQPage /></ComingSoonOverlay><PageNavigation /></>} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/events" element={<><ComingSoonOverlay><EventsPage /></ComingSoonOverlay><PageNavigation /></>} />

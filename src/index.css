@@ -6,7 +6,7 @@
 
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-uncial: "Uncial Antiqua", cursive;
   --font-cinzel: "Cinzel", serif;
   --font-medieval: "MedievalSharp", cursive;
@@ -134,10 +134,3 @@ textarea,
 .ring-glow-inner {
   transition: filter 0.4s ease-out;
 }
-
-/* Hover effects - intensify glow on all rings when hovering the ring container */
-.rings-container:hover .ring-glow-outer {}
-
-.rings-container:hover .ring-glow-middle {}
-
-.rings-container:hover .ring-glow-inner {}
