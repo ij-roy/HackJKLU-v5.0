@@ -28,25 +28,26 @@ export function useIntersectionObserver(
 export function useFPS() {
   const [fps, setFPS] = useState(60);
   const frameCount = useRef(0);
-  const lastTime = useRef(performance.now());
+  const lastTime = useRef(0);
   const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
+    lastTime.current = performance.now();
     const countFPS = () => {
       frameCount.current++;
       const currentTime = performance.now();
-      
+
       if (currentTime >= lastTime.current + 1000) {
         setFPS(frameCount.current);
         frameCount.current = 0;
         lastTime.current = currentTime;
       }
-      
+
       rafIdRef.current = requestAnimationFrame(countFPS);
     };
 
     rafIdRef.current = requestAnimationFrame(countFPS);
-    
+
     return () => {
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
@@ -61,7 +62,7 @@ export function useFPS() {
 export async function cacheModel(url: string, data: ArrayBuffer) {
   return new Promise<void>((resolve, reject) => {
     const request = indexedDB.open('modelCache', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
@@ -71,7 +72,7 @@ export async function cacheModel(url: string, data: ArrayBuffer) {
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     };
-    
+
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains('models')) {
@@ -84,14 +85,14 @@ export async function cacheModel(url: string, data: ArrayBuffer) {
 export async function getCachedModel(url: string): Promise<ArrayBuffer | null> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('modelCache', 1);
-    
+
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction(['models'], 'readonly');
       const store = transaction.objectStore('models');
       const getRequest = store.get(url);
-      
+
       getRequest.onsuccess = () => resolve(getRequest.result || null);
       getRequest.onerror = () => reject(getRequest.error);
     };

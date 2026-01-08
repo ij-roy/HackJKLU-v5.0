@@ -55,7 +55,6 @@ const domainPrizes = [
 
 export default function Prizes() {
     const [activeIndex, setActiveIndex] = useState(0);
-    const [domainActiveIndex, setDomainActiveIndex] = useState(0);
     const [currentSection, setCurrentSection] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -64,10 +63,6 @@ export default function Prizes() {
     const prevIndex = (activeIndex - 1 + mainPrizes.length) % mainPrizes.length;
     const nextIndex = (activeIndex + 1) % mainPrizes.length;
     const activePrize = mainPrizes[activeIndex];
-
-    const domainPrevIndex = (domainActiveIndex - 1 + domainPrizes.length) % domainPrizes.length;
-    const domainNextIndex = (domainActiveIndex + 1) % domainPrizes.length;
-    const activeDomainPrize = domainPrizes[domainActiveIndex];
 
     const sections = [
         { id: 0, name: 'main-prizes', label: 'Main Prizes' },
@@ -141,21 +136,6 @@ export default function Prizes() {
         setActiveIndex(index);
     };
 
-    const handleDomainNext = () => {
-        if (isAnimating) return;
-        setDomainActiveIndex((prev) => (prev + 1) % domainPrizes.length);
-    };
-
-    const handleDomainPrev = () => {
-        if (isAnimating) return;
-        setDomainActiveIndex((prev) => (prev - 1 + domainPrizes.length) % domainPrizes.length);
-    };
-
-    const goToDomainSlide = (index: number) => {
-        if (isAnimating || index === domainActiveIndex) return;
-        setDomainActiveIndex(index);
-    };
-
     const switchSection = (nextSection: number) => {
         if (isAnimating || nextSection === currentSection) return;
 
@@ -202,28 +182,15 @@ export default function Prizes() {
                         setIsPaused(!isPaused);
                         break;
                 }
-            } else { // Domain prizes section
+            } else {
+                // For Domain Prizes (Grid), we might just allow vertical scrolling or section switching
                 switch (e.key) {
-                    case 'ArrowLeft':
-                        e.preventDefault();
-                        handleDomainPrev();
-                        break;
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        handleDomainNext();
-                        break;
                     case 'ArrowUp':
                         e.preventDefault();
                         if (currentSection > 0) switchSection(currentSection - 1);
                         break;
-                    case 'ArrowDown':
-                        e.preventDefault();
-                        if (currentSection < sections.length - 1) switchSection(currentSection + 1);
-                        break;
-                    case ' ':
-                        e.preventDefault();
-                        setIsPaused(!isPaused);
-                        break;
+                    // Allow normal key behavior or other interactions?
+                    // Removed Left/Right for carousel since it is now a grid
                 }
             }
         };
@@ -240,7 +207,7 @@ export default function Prizes() {
                 document.removeEventListener('keydown', handleKeyDown);
             }
         };
-    }, [currentSection, isAnimating, isPaused, activeIndex, domainActiveIndex]);
+    }, [currentSection, isAnimating, isPaused, activeIndex]);
 
     // Auto-play functionality
     useEffect(() => {
@@ -250,13 +217,8 @@ export default function Prizes() {
             }, 10000); // Change slide every 10 seconds
 
             return () => clearInterval(interval);
-        } else if (currentSection === 1 && !isPaused && !isAnimating) {
-            const interval = setInterval(() => {
-                handleDomainNext();
-            }, 10000);
-            return () => clearInterval(interval);
         }
-    }, [activeIndex, domainActiveIndex, currentSection, isPaused, isAnimating]);
+    }, [activeIndex, currentSection, isPaused, isAnimating]);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -293,7 +255,7 @@ export default function Prizes() {
                     >
                         {/* Slide Indicators - Show for both sections appropriately */}
                         <div className="flex justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            {currentSection === 0 ? mainPrizes.map((_, index) => (
+                            {currentSection === 0 && mainPrizes.map((_, index) => (
                                 <button
                                     key={`main-${index}`}
                                     onClick={() => goToSlide(index)}
@@ -302,16 +264,6 @@ export default function Prizes() {
                                         : 'bg-neutral-600 hover:bg-neutral-500'
                                         }`}
                                     aria-label={`Go to ${mainPrizes[index].god} prize`}
-                                />
-                            )) : domainPrizes.map((_, index) => (
-                                <button
-                                    key={`domain-${index}`}
-                                    onClick={() => goToDomainSlide(index)}
-                                    className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${index === domainActiveIndex
-                                        ? 'bg-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.6)]'
-                                        : 'bg-neutral-600 hover:bg-neutral-500'
-                                        }`}
-                                    aria-label={`Go to ${domainPrizes[index].title} prize`}
                                 />
                             ))}
                         </div>
@@ -818,110 +770,65 @@ export default function Prizes() {
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className={`absolute inset-0 flex flex-col items-center justify-center z-20 font-cinzel ${currentSection === 1 ? 'block' : 'hidden'}`}
             >
-                <div className="container mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-12 lg:py-16 h-full flex flex-col justify-center items-center">
+                {/* Container with dynamic padding based on screen height */}
+                <div className="container mx-auto px-4 w-full h-full flex flex-col justify-center items-center pt-16 sm:pt-20 md:pt-24 pb-4">
                     <motion.h2
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-[0.1em] sm:tracking-[0.15em] md:tracking-[0.2em] text-[#e8dab2] text-center mb-8 drop-shadow-[0_0_15px_rgba(232,218,178,0.3)]"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.1em] text-[#e8dab2] text-center mb-4 sm:mb-8 drop-shadow-[0_0_15px_rgba(232,218,178,0.3)] shrink-0"
                     >
                         DOMAIN PRIZES
                     </motion.h2>
 
-                    {/* DOMAIN PRIZES CAROUSEL */}
-                    <div className="relative w-full max-w-7xl h-[380px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] flex items-center justify-center">
-                        {/* Navigation Buttons */}
-                        <button
-                            onClick={handleDomainPrev}
-                            className="absolute left-[-10px] sm:left-[-20px] md:left-2 lg:left-4 xl:left-[-60px] 2xl:left-[-100px] top-1/2 z-30 p-2 sm:p-3 hover:scale-110 active:scale-95 transition-transform -translate-y-1/2 focus:outline-none opacity-80 hover:opacity-100"
-                            aria-label="Previous domain prize"
-                        >
-                            <img src={arrowLeft} alt="" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]" />
-                        </button>
-                        <button
-                            onClick={handleDomainNext}
-                            className="absolute right-[-10px] sm:right-[-20px] md:right-2 lg:right-4 xl:right-[-60px] 2xl:right-[-100px] top-1/2 z-30 p-2 sm:p-3 hover:scale-110 active:scale-95 transition-transform -translate-y-1/2 focus:outline-none opacity-80 hover:opacity-100"
-                            aria-label="Next domain prize"
-                        >
-                            <img src={arrowRight} alt="" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]" />
-                        </button>
-
-                        {/* Cards Container */}
-                        <div className="relative w-full h-full flex items-center justify-center px-2 sm:px-4 md:px-8 lg:px-12">
-                            {/* Left Card (Previous) */}
+                    {/* DOMAIN PRIZES GRID - Responsive Height */}
+                    <div className="w-full max-w-[1400px] flex flex-wrap justify-center items-center content-center gap-4 sm:gap-6 lg:gap-8 perspective-1000">
+                        {domainPrizes.map((prize, index) => (
                             <motion.div
-                                key={`domain-prev-${domainPrevIndex}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.25, x: 0, scale: 0.6 }}
-                                className="absolute left-[2%] sm:left-[4%] md:left-[6%] lg:left-[8%] xl:left-[10%] blur-[1px] z-10 cursor-pointer hidden md:block"
-                                onClick={handleDomainPrev}
+                                key={`domain-card-${index}`}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="relative group w-[160px] h-[240px] XS:w-[180px] XS:h-[280px] sm:w-[220px] sm:h-[320px] md:w-[200px] md:h-[300px] lg:w-[240px] lg:h-[380px] xl:w-[280px] xl:h-[420px] rounded-xl overflow-hidden cursor-pointer border border-[#d4af37]/40 hover:border-[#d4af37] transition-all duration-500 bg-[#0a0a0a]"
+                                whileHover={{ scale: 1.05, zIndex: 10 }}
                             >
-                                <div className="relative w-[180px] h-[260px] sm:w-[220px] sm:h-[300px] lg:w-[260px] lg:h-[360px] rounded-xl overflow-hidden border border-[#d4af37]/40" style={{ backgroundColor: '#171717' }}>
-                                    <div className="absolute inset-0 bg-cover bg-center grayscale" style={{ backgroundImage: `url(${domainPrizes[domainPrevIndex].img})` }} />
-                                    <div className="absolute inset-0 bg-black/60" />
+                                {/* Background Image - Blurs on Hover */}
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out group-hover:blur-[2px] group-hover:scale-110 grayscale-[0.8] group-hover:grayscale-0"
+                                    style={{ backgroundImage: `url(${prize.img})` }}
+                                />
+
+                                {/* Dark Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent group-hover:bg-black/60 transition-all duration-500" />
+
+                                {/* Static Border Frame (Golden) */}
+                                <div className="absolute inset-2 border border-[#d4af37]/20 rounded-lg pointer-events-none z-20 transition-colors group-hover:border-[#d4af37]/60" />
+
+                                {/* Content Container - Centered */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-4 group-hover:translate-y-0">
+                                    <h3
+                                        className="text-lg sm:text-xl md:text-2xl font-bold mb-2 font-medieval tracking-widest text-[#e8dab2] drop-shadow-lg"
+                                    >
+                                        {prize.title}
+                                    </h3>
+                                    <div className="w-8 h-0.5 bg-[#d4af37] mb-2 shadow-[0_0_8px_rgba(212,175,55,0.8)]" />
+                                    <p className="text-neutral-200 font-baskerville italic text-xs sm:text-sm tracking-wider drop-shadow-md">
+                                        {prize.desc}
+                                    </p>
                                 </div>
-                            </motion.div>
 
-                            {/* Active Card (Center) */}
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={`domain-active-${domainActiveIndex}`}
-                                    initial={{ scale: 0.85, opacity: 0, rotateY: -15 }}
-                                    animate={{ scale: 1, opacity: 1, x: 0, rotateY: 0 }}
-                                    exit={{ scale: 0.85, opacity: 0, rotateY: 15 }}
-                                    transition={{ duration: 0.6, ease: "easeOut" }}
-                                    className="z-20 relative group cursor-pointer"
-                                    style={{ transformStyle: 'preserve-3d' }}
-                                    whileHover={{ scale: 1.05, y: -10 }}
-                                    onMouseEnter={() => setIsPaused(true)}
-                                    onMouseLeave={() => setIsPaused(false)}
-                                >
-                                    <div className="relative w-[280px] h-[360px] sm:w-[320px] sm:h-[400px] md:w-[360px] md:h-[440px] lg:w-[400px] lg:h-[480px] rounded-xl overflow-hidden border border-[#d4af37] group-hover:border-[#d4af37] transition-all duration-500" style={{ backgroundColor: '#171717', boxShadow: '0 0 30px rgba(212, 175, 55, 0.2)' }}>
-                                        {/* Image */}
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700 ease-out transform group-hover:scale-110"
-                                            style={{ backgroundImage: `url(${activeDomainPrize.img})` }}
-                                        />
-
-                                        {/* Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90" />
-
-                                        {/* Corner Accents */}
-                                        <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-[#d4af37] opacity-80" />
-                                        <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-[#d4af37] opacity-80" />
-                                        <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-[#d4af37] opacity-80" />
-                                        <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-[#d4af37] opacity-80" />
-
-                                        {/* Text Content */}
-                                        <div className="absolute bottom-0 left-0 w-full text-center px-4 pb-8 transform group-hover:translate-y-[-8px] transition-transform duration-500">
-                                            <h4 className="text-3xl sm:text-4xl text-[#d4af37] font-bold mb-3 font-medieval tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                                                {activeDomainPrize.title}
-                                            </h4>
-                                            <div className="inline-block">
-                                                <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-neutral-300 border-t border-[#d4af37]/40 pt-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-                                                    {activeDomainPrize.desc}
-                                                </p>
-                                            </div>
-                                        </div>
+                                {/* Default View Title (Visible only when NOT hovering) */}
+                                <div className="absolute bottom-4 left-0 w-full text-center transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-4 z-20">
+                                    <div className="bg-black/60 backdrop-blur-sm border-y border-[#d4af37]/30 py-1.5 sm:py-2 mx-2 sm:mx-4">
+                                        <h3 className="text-sm sm:text-lg font-bold text-[#e8dab2] tracking-widest font-cinzel">
+                                            {prize.title}
+                                        </h3>
                                     </div>
-                                </motion.div>
-                            </AnimatePresence>
-
-                            {/* Right Card (Next) */}
-                            <motion.div
-                                key={`domain-next-${domainNextIndex}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.25, x: 0, scale: 0.6 }}
-                                className="absolute right-[1%] sm:right-[1%] md:right-[1%] lg:right-[1%] xl:right-[1%] blur-[1px] z-10 cursor-pointer hidden md:block"
-                                onClick={handleDomainNext}
-                            >
-                                <div className="relative w-[180px] h-[260px] sm:w-[220px] sm:h-[300px] lg:w-[260px] lg:h-[360px] rounded-xl overflow-hidden border border-[#d4af37]/40" style={{ backgroundColor: '#171717' }}>
-                                    <div className="absolute inset-0 bg-cover bg-center grayscale" style={{ backgroundImage: `url(${domainPrizes[domainNextIndex].img})` }} />
-                                    <div className="absolute inset-0 bg-black/60" />
                                 </div>
                             </motion.div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </motion.section>

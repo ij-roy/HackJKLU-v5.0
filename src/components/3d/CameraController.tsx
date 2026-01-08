@@ -9,7 +9,12 @@ interface CameraControllerProps {
   onComplete?: () => void;
 }
 
-export function CameraController({ 
+type Controls = {
+  target: { x: number; y: number; z: number };
+  update: () => void;
+}
+
+export function CameraController({
   target = [0, 0, 0],
   position = [0, 0, 5],
   duration = 2,
@@ -37,7 +42,7 @@ export function CameraController({
 
     // Animate camera target (if controls support it)
     if ('target' in controls) {
-      tl.to((controls as any).target, {
+      tl.to((controls as unknown as Controls).target, {
         x: target[0],
         y: target[1],
         z: target[2],
@@ -55,7 +60,7 @@ export function CameraController({
 
   useFrame(() => {
     if (controls && 'update' in controls) {
-      (controls as any).update();
+      (controls as unknown as Controls).update();
     }
   });
 
