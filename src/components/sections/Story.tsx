@@ -1,6 +1,8 @@
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import { CloudTransition } from '../ui/CloudTransition';
 
 const storyContent = [
     {
@@ -12,14 +14,33 @@ const storyContent = [
         img: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" // College/Campus vibe
     },
     {
-        text: "Ideate. Innovate. Inspire. Solve Real World Challenges.",
+        text: "Where innovation meets code. Solve Real World Challenges.",
         img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop" // Abstract Network
     }
 ];
 
 export function Story() {
+    const location = useLocation();
+    // Initialize state directly from location to avoid "flash" of content before effect runs
+    const [showTransition, setShowTransition] = useState(() => !!location.state?.transition);
+
+    useEffect(() => {
+        if (location.state?.transition) {
+            // Clear location state to prevent running on refresh/back
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
+
     return (
         <section className="relative z-10 bg-black text-white">
+            {/* Cloud Uncover Transition */}
+            {showTransition && (
+                <CloudTransition
+                    type="uncover"
+                    onComplete={() => setShowTransition(false)}
+                />
+            )}
+
             {storyContent.map((item, index) => (
                 <StoryBlock key={index} item={item} index={index} />
             ))}

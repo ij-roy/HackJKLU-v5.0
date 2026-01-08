@@ -6,7 +6,7 @@
 
 @import "tailwindcss";
 
-@theme {
+:root {
   --font-uncial: "Uncial Antiqua", cursive;
   --font-cinzel: "Cinzel", serif;
   --font-medieval: "MedievalSharp", cursive;
@@ -40,7 +40,19 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #0c0a09;
-  /* cursor: none;  Removed to respect original site lacking customized cursor, unless user explicitly demands it globally. I will leave it normal for now. */
+  /* Golden Greek Spear/Arrow Cursor */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%23d4af37' stroke='%233d2b00' stroke-width='1.5'%3E%3Cpath d='M2 2l11 19l-3-8l8-3L2 2z'/%3E%3C/svg%3E") 2 2, auto;
+}
+
+/* Pointer cursor for interactive elements */
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+.cursor-pointer {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%23ffd700' stroke='%233d2b00' stroke-width='1.5'%3E%3Cpath d='M2 2l11 19l-3-8l8-3L2 2z'/%3E%3C/svg%3E") 2 2, pointer !important;
 }
 
 /* Custom Scrollbar */
@@ -70,4 +82,55 @@ body {
   pointer-events: none;
   z-index: 50;
   mix-blend-mode: overlay;
+}
+
+/* Custom animations for rotating rings */
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse linear infinite;
+}
+
+/* Ring container positioning */
+.ring-container-1,
+.ring-container-2,
+.ring-container-3 {
+  left: 50%;
+  transform-origin: center center;
+}
+
+/* Override default spin animation to not interfere with positioning */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ring glow styles */
+.ring-glow-outer {
+  transition: filter 0.4s ease-out;
+}
+
+.ring-glow-middle {
+  transition: filter 0.4s ease-out;
+}
+
+.ring-glow-inner {
+  transition: filter 0.4s ease-out;
 }

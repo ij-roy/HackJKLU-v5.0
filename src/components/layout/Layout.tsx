@@ -36,30 +36,30 @@ export function Layout({ children }: LayoutProps) {
                 <div className="absolute top-0 left-26 right-20 h-px pointer-events-none" style={{ backgroundColor: 'rgba(126, 64, 49, 0.3)' }}></div>
 
                 {/* Menu - Left */}
-                <div className="absolute top-0 left-8 -translate-y-1/2 pointer-events-auto px-2" style={{ backgroundColor: 'var(--void-black)' }}>
+                <div className="absolute top-0 left-8 -translate-y-1/2 pointer-events-auto px-2">
                     <button
                         onClick={() => setIsMenuOpen(true)}
                         className="flex items-center gap-2 group"
                     >
-                        <span className="uppercase text-xs tracking-[0.2em] transition-colors" style={{ color: 'rgba(255, 236, 209, 0.8)' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--golden-amber)'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 236, 209, 0.8)'}>Menu</span>
+                        <span className="uppercase text-sm tracking-[0.2em] transition-colors" style={{ color: 'rgba(255, 236, 209, 0.8)' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--golden-amber)'} onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 236, 209, 0.8)'}>Menu</span>
                     </button>
                 </div>
 
                 {/* Logo - Center */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto px-6 h-12 flex items-center justify-center" style={{ backgroundColor: 'var(--void-black)' }}>
-                    <Link to="/" className="block transition-transform hover:scale-110 duration-300">
-                        <img src={owlLogo} alt="HackJKLU Owl" className="h-16 w-auto object-contain mt-8" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto px-6 h-16 flex items-center justify-center">
+                    <Link to="/" className="flex items-center transition-transform hover:scale-110 duration-300">
+                        <img src={owlLogo} alt="HackJKLU Owl" className="h-16 w-auto object-contain" />
                     </Link>
                 </div>
 
                 {/* Sound Button - Right */}
-                <div className="absolute top-0 right-8 -translate-y-1/2 pointer-events-auto px-2" style={{ backgroundColor: 'var(--void-black)' }}>
+                <div className="absolute top-0 right-8 -translate-y-1/2 pointer-events-auto px-2">
                     <button
                         onClick={() => setIsMuted(!isMuted)}
                         className="opacity-80 hover:opacity-100 transition-opacity"
                         style={{ color: 'var(--ivory-cream)' }}
                     >
-                        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                        {isMuted ? <VolumeX className="w-7 h-7" /> : <Volume2 className="w-7 h-7" />}
                     </button>
                 </div>
             </div>
