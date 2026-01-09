@@ -1,126 +1,233 @@
-import { motion } from 'framer-motion';
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 
+// Load all gallery images
 const modules = import.meta.glob('../../assets/gallery/*.{jpg,JPG,jpeg,png,webp}', { eager: true });
 const galleryImages = Object.values(modules).map((mod: any) => mod.default);
 
+// Mythic Captions
 const captions = [
     "LEGENDARY MOMENTS", "HEROES CODING", "THE ORACLE SPEAKS", "BUILDING OLYMPUS",
     "CODE OF THE GODS", "TITAN'S WORK", "MYTHIC CREATIONS", "VICTORY FEAST",
     "THE ODYSSEY BEGINS", "SPARTAN DISCIPLINE", "ATHENIAN WISDOM", "DELPHI'S VISION"
 ];
 
-export function PastPhotos() {
-    const containerRef = useRef(null);
-    const [columns, setColumns] = useState(5);
+interface GalleryImage {
+    src: string;
+    caption: string;
+    id: number;
+}
 
-    // Responsive column calculation
+export function PastPhotos() {
+    const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+    const [columns, setColumns] = useState(4);
+
+    // Responsive Column Calculation
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 640) setColumns(2); // Mobile: 2 columns
-            else if (window.innerWidth < 1024) setColumns(3); // Tablet: 3 columns
-            else setColumns(5); // Desktop: 5 columns
+            if (window.innerWidth < 640) setColumns(1);
+            else if (window.innerWidth < 1024) setColumns(2);
+            else if (window.innerWidth < 1400) setColumns(3);
+            else setColumns(4);
         };
-
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Memoize photo positions to prevent random jumping on re-renders, but updating on column change
-    const photos = useMemo(() => {
-        const rowHeight = columns < 3 ? 280 : 380; // Pixel height per row
-
-        return galleryImages.map((src, i) => {
-            const col = i % columns;
-            const row = Math.floor(i / columns);
-
-            // Calculate strictly aligned grid positions with minimal random jitter
-            // This ensures "more aligned" and "easily visible" photos
-            return {
-                src,
+    // Split images into columns for true Masonry layout
+    const columnStreams = useMemo(() => {
+        const streams = Array.from({ length: columns }, () => [] as GalleryImage[]);
+        galleryImages.forEach((img, i) => {
+            streams[i % columns].push({
+                src: img as string,
                 caption: captions[i % captions.length],
-                // Subtle rotation for organic feel without chaos
-                rotation: (i % 2 === 0 ? 1 : -1) * (2 + Math.random() * 3),
-                // Pixel-based top position for stability
-                top: row * rowHeight + 20 + (Math.random() * 15),
-                // Percentage-based left position centered in column slot
-                left: `${(col * (100 / columns)) + (columns < 3 ? 2 : 1)}%`,
-                // Dynamic width to fill column cleanly
-                width: columns < 3 ? '46%' : columns === 3 ? '30%' : '18%',
-                zIndex: i + 1
-            };
+                id: i
+            });
         });
+        return streams;
     }, [columns]);
 
-    // Calculate container height ensuring all items fit
-    const rowHeight = columns < 3 ? 280 : 380;
-    const totalHeight = Math.ceil(galleryImages.length / columns) * rowHeight + 200;
+    // Background Parallax for "Floating Dust"
+    const { scrollYProgress } = useScroll();
+    const yBg = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+    // Memoize particles to prevent hydration mismatch
+    const particles = useMemo(() => Array.from({ length: 20 }).map((_, i) => ({
+        id: i,
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        size: Math.random() * 4 + 1,
+        opacity: Math.random() * 0.5 + 0.2
+    })), []);
 
     return (
-        <section className="min-h-screen bg-[#0c0a09] relative overflow-hidden flex flex-col items-center py-20 px-4 mythic-texture">
-            {/* Title */}
-            <div className="z-20 text-center mb-10 md:mb-20 relative pointer-events-none">
-                <h2 className="text-4xl md:text-7xl font-[Uncial Antiqua] text-[#d4af37] tracking-wider drop-shadow-[0_4px_10px_rgba(212,175,55,0.3)]">
-                    Past Memories
-                </h2>
-                <div className="h-1 w-48 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent mx-auto mt-4"></div>
-                <p className="font-[Cinzel] text-[#a89f91] mt-4 tracking-[0.2em] uppercase text-xs md:text-sm">
-                    {galleryImages.length} Artifacts Discovered
+        <section className="relative min-h-screen bg-neutral-950 overflow-hidden py-24 px-4 sm:px-8">
+            {/* --- MYTHIC BACKGROUND --- */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20 mix-blend-overlay"></div>
+                <motion.div
+                    style={{ y: yBg }}
+                    className="absolute inset-0 opacity-30"
+                >
+                    {/* Floating Gold Particles */}
+                    {particles.map((p) => (
+                        <div
+                            key={p.id}
+                            className="absolute rounded-full bg-gold-500 blur-[1px]"
+                            style={{
+                                top: `${p.top}%`,
+                                left: `${p.left}%`,
+                                width: `${p.size}px`,
+                                height: `${p.size}px`,
+                                opacity: p.opacity,
+                            }}
+                        />
+                    ))}
+                </motion.div>
+                {/* Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-transparent to-neutral-950 z-10"></div>
+            </div>
+
+            {/* --- HEADER --- */}
+            <div className="relative z-10 text-center mb-16 md:mb-24">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-[Cinzel] text-transparent bg-clip-text bg-gradient-to-b from-amber-100 to-amber-700 drop-shadow-[0_5px_15px_rgba(212,175,55,0.2)] tracking-widest mb-4 px-2">
+                        HALL OF MEMORIES
+                    </h2>
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                        <div className="h-[1px] w-12 sm:w-32 bg-gradient-to-r from-transparent to-amber-600"></div>
+                        <span className="text-amber-500 font-[Cinzel] text-xl">✦</span>
+                        <div className="h-[1px] w-12 sm:w-32 bg-gradient-to-l from-transparent to-amber-600"></div>
+                    </div>
+                    <p className="font-[Cinzel] text-amber-100/60 uppercase tracking-[0.3em] text-[10px] sm:text-xs md:text-sm">
+                        32 Artifacts Discovered
+                    </p>
+                </motion.div>
+            </div>
+
+            {/* --- MASONRY GRID --- */}
+            <div className="relative z-10 max-w-[1600px] mx-auto grid gap-4 sm:gap-6 md:gap-8"
+                style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+
+                {columnStreams.map((column, colIndex) => (
+                    <div key={colIndex} className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+                        {column.map((item: any, i: number) => (
+                            <GalleryItem
+                                key={item.id}
+                                item={item}
+                                index={i}
+                                colIndex={colIndex}
+                                onClick={() => setSelectedImage(item)}
+                            />
+                        ))}
+                    </div>
+                ))}
+            </div>
+
+            {/* --- LIGHTBOX MODAL --- */}
+            <AnimatePresence>
+                {selectedImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSelectedImage(null)}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 sm:p-8 cursor-pointer"
+                    >
+                        <motion.div
+                            layoutId={`image-${selectedImage.src}`}
+                            className="relative max-w-6xl w-full max-h-[90vh] flex flex-col items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <img
+                                src={selectedImage.src}
+                                alt={selectedImage.caption}
+                                className="w-auto h-auto max-w-full max-h-[80vh] object-contain border-2 border-amber-600/30 shadow-[0_0_50px_rgba(212,175,55,0.1)] rounded-sm"
+                            />
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="mt-6 text-center"
+                            >
+                                <h3 className="text-amber-100 font-[Cinzel] text-lg sm:text-2xl tracking-widest border-b border-amber-500/30 pb-2 inline-block px-8 drop-shadow-md">
+                                    {selectedImage.caption}
+                                </h3>
+                            </motion.div>
+
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setSelectedImage(null)}
+                                className="absolute top-4 right-4 md:-top-12 md:right-0 bg-black/50 md:bg-transparent rounded-full p-2 md:p-0 text-amber-500 hover:text-amber-200 transition-colors z-50"
+                            >
+                                <span className="font-[Cinzel] text-xl tracking-widest">✕</span>
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </section>
+    );
+}
+
+// Individual Gallery Card Component
+interface GalleryItemProps {
+    item: { src: string; caption: string };
+    index: number;
+    colIndex: number;
+    onClick: () => void;
+}
+
+function GalleryItem({ item, index, colIndex, onClick }: GalleryItemProps) {
+    return (
+        <motion.div
+            layoutId={`container-${item.src}`}
+            initial={{ opacity: 0, y: 50, filter: 'grayscale(100%)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'grayscale(80%)' }}
+            whileHover={{
+                scale: 1.03,
+                filter: 'grayscale(0%) contrast(1.1)',
+                zIndex: 10,
+                transition: { duration: 0.3 }
+            }}
+            viewport={{ once: true, margin: "50px" }}
+            transition={{ duration: 0.8, delay: (colIndex * 0.2) + (index * 0.1) }}
+            onClick={onClick}
+            className="group relative cursor-pointer overflow-hidden rounded-sm border-[1px] border-amber-900/20 bg-neutral-900 shadow-lg transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:border-amber-500/40"
+        >
+            {/* Image Container */}
+            <div className="relative overflow-hidden">
+                <motion.img
+                    layoutId={`image-${item.src}`}
+                    src={item.src}
+                    alt={item.caption}
+                    className="w-full h-auto transform transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                />
+
+                {/* Vintage Overlay - Fades out on hover */}
+                <div className="absolute inset-0 bg-sepia/20 mix-blend-multiply group-hover:opacity-0 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
+            </div>
+
+            {/* Caption Overlay - Appears on hover */}
+            <div className="absolute bottom-0 inset-x-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-black/60 backdrop-blur-sm border-t border-amber-500/20">
+                <p className="text-amber-100 font-[Cinzel] text-xs sm:text-sm text-center tracking-[0.2em]">
+                    {item.caption}
                 </p>
             </div>
 
-            {/* Scattered Gallery Container - Dynamic Height */}
-            <div
-                ref={containerRef}
-                className="relative w-full max-w-[1400px]"
-                style={{ height: `${totalHeight}px` }}
-            >
-                {photos.map((photo, i) => (
-                    <motion.div
-                        key={i}
-                        drag
-                        dragConstraints={containerRef}
-                        whileHover={{ scale: 1.1, rotate: 0, zIndex: 1000 }}
-                        whileDrag={{ scale: 1.1, zIndex: 1000 }}
-                        initial={{ opacity: 0, scale: 0.8, y: 50 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-50px" }}
-                        transition={{ duration: 0.5, delay: (i % columns) * 0.1 }}
-                        className="absolute cursor-grab active:cursor-grabbing group touch-none"
-                        style={{
-                            top: photo.top,
-                            left: photo.left,
-                            width: photo.width,
-                            rotate: photo.rotation,
-                            zIndex: photo.zIndex
-                        }}
-                    >
-                        {/* Photo Frame */}
-                        <div className="bg-[#f0e6d2] p-2 pb-6 md:p-3 md:pb-10 shadow-[0_10px_20px_rgba(0,0,0,0.5)] transform transition-colors duration-300 border border-[#d4af37]/40 w-full">
-                            <div className="relative overflow-hidden aspect-[4/3] border border-black/10">
-                                {/* Vintage Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-[#3e2715]/20 to-transparent mix-blend-overlay z-10 pointer-events-none"></div>
-                                <div className="absolute inset-0 bg-sepia/10 z-10 pointer-events-none"></div>
-
-                                <img
-                                    src={photo.src}
-                                    alt={photo.caption}
-                                    className="w-full h-full object-cover filter contrast-[1.05] sepia-[0.2] group-hover:sepia-0 group-hover:contrast-100 transition-all duration-500"
-                                    draggable="false"
-                                />
-                            </div>
-
-                            {/* Caption */}
-                            <div className="absolute bottom-2 md:bottom-3 left-0 right-0 text-center">
-                                <p className="font-[Cinzel] text-[#3e2715] text-[9px] md:text-[11px] font-bold tracking-[0.15em] opacity-70 group-hover:opacity-100 uppercase truncate px-2">
-                                    {photo.caption}
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-        </section>
+            {/* Corner Accents */}
+            <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-amber-600/0 group-hover:border-amber-600/60 transition-colors duration-500" />
+            <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-amber-600/0 group-hover:border-amber-600/60 transition-colors duration-500" />
+            <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-amber-600/0 group-hover:border-amber-600/60 transition-colors duration-500" />
+            <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-amber-600/0 group-hover:border-amber-600/60 transition-colors duration-500" />
+        </motion.div>
     );
 }
