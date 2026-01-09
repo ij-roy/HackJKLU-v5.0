@@ -316,11 +316,11 @@ export function Themes() {
                       className="absolute inset-0 flex flex-col items-center justify-center px-[14%] pt-[14%] pb-[14%] text-center"
                     >
                       {/* Theme Image */}
-                      <div className="w-full max-w-[70%] mb-0 md:mb-5 rounded overflow-hidden grayscale opacity-75 max-h[100%]">
+                      <div className="w-full max-w-[70%] mb-0 md:mb-5 rounded overflow-hidden grayscale opacity-75 max-h-full">
                         <img
                           src={theme.image}
                           alt={theme.title}
-                          className="w-full h-[100%] object-cover"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                           decoding="async"
                         />
